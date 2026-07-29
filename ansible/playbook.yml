@@ -1,0 +1,35 @@
+- name: Teste
+  hosts: maquina_local
+  become: yes
+
+  vars:
+    local_index: "{{ playbook_dir }}/../app/index.html"
+    acao: iniciar
+
+  tasks:
+    - name: Instala a última versão do nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+        update_cache: true
+
+    - name: Iniciar Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: false
+      when: acao == "iniciar"
+
+    - name: Parar Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: stopped
+      when: acao == "parar"
+
+    - name: Criar página do laboratório
+      ansible.builtin.copy:
+        src: "{{ local_index }}"
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: "0644"
